@@ -1,0 +1,8 @@
+git remote add origin https://github.com/mallikanmallu/gitnew1.git
+
+$ git push -u origin master
+
+
+new_token:
+
+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
