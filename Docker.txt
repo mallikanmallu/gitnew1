@@ -1,0 +1,793 @@
+ 
+Commands while downloaing docker via aws on ubuntu OS
+
+1  curl -fsSL https://get.docker.com -o get-docker.sh
+    2  sh get-docker.sh
+    3  docker --version
+
+
+
+docker run --name qaserver -d -p 6060:8080 --link myjenins:jenkins tomee
+
+
+---
+version: '3.8'
+services:
+ mydb:
+  image: mysql
+  environment:
+   MYSQL_ROOT_PASSWORD: mallika
+ apache:
+  image: httpd
+  ports:
+   --9999:80
+  links:
+   -mydb:mysql
+ php:
+  image: php:7.2-apache
+  links:
+   -mydb:mysql
+   -apache:httpd
+...
+
+
+
+---------------------
+
+---
+version: '3.8'
+services:
+ mydb:
+  image: mysql
+  environment:
+   MYSQL_ROOT_PASSWORD: mallika
+ apache:
+  image: httpd
+  ports:
+   - 9999:80
+  links:
+   - mydb:mysql
+ php:
+  image: php:7.2-apache
+  links:
+   - mydb:mysql
+   - apache:httpd
+...
+
+--------------------------------------------------
+
+10th sess
+
+To go to interactive terminal of any container created below is the commnad
+
+docker exec -it j1 bash
+
+j1 is the container name
+
+
+----
+EXPOSE port number creates new port for any container which we can define any port 
+
+FROM nginx
+MAINTAINER Mallika
+EXPOSE 90
+-----------------------
+
+FROM centos
+MAINTAINER Mallika
+
+RUN yum -y update
+RUN yum install -y httpd
+EXPOSE 80
+COPY index.html /var/www/html/
+ENTRYPOINT ["/usr/sbin/httpd","-D","FOREGROUND"]
+
+
+==================================================
+
+11th session
+-----
+
+
+-------------
+FROM ubuntu
+MAINTAINER Mallika
+ADD https://get.jenkins.io/war-stable/2.303.3/jenkins.war /
+
+
+-----
+CMD
+ENTRY POINT 
+----------------
+
+ vi dockerfile
+root@ip-172-31-9-1:~# docker build -t myubuntu .         
+Above command to run the new container from dockerfile
+
+------
+FROM ubuntu
+MAINTAINER Mallika
+RUN apt-get update
+RUN apt-get install -y openjdk-8-jdk
+ADD https://get.jenkins.io/war-stable/2.303.3/jenkins.war /
+
+ENTRYPOINT ["java","-jar","jenkins.war"]
+
+
+
+---------------
+which --command shows where a software is installed
+
+------------------
+
+FROM centos
+MAINTAINER Mallika
+
+RUN yum -y update
+RUN yum install -y httpd
+EXPOSE 80
+COPY index.html /var/www/html/
+ENTRYPOINT ["/usr/sbin/httpd","-D","FOREGROUND"]
+
+
+--------
+ index.html
+======
+<html>
+        <body>
+                <h1>Welcome to Docker </h1>
+        </body>
+</html>
+----
+----------------------
+
+docker build -t mycentos .
+
+docker run --name c2 -d -P mycentos
+=================
+
+
+
+11th session:
+------------
+
+FROM ubuntu
+MAINTAINER Mallika
+
+RUN apt-get update
+RUN apt-get install -y nginx
+
+EXPOSE 80
+ENTRYPOINT ["/usr/sbin/nginx","-g","daemon off;"]
+=========================
+
+Networdk
+-----
+docker network ls
+NETWORK ID     NAME      DRIVER    SCOPE
+a0295fab6e30   bridge    bridge    local
+6ea05943df5c   host      host      local
+4469286ea3fb   none      null      local
+root@ip-172-31-9-1:~#
+root@ip-172-31-9-1:~# docker network create --driver  bridge Test1
+
+
+
+172.18.0.2        c1
+
+
+======================
+
+
+
+version: '3.8'
+
+services:
+ mydb:
+  image: mysql:5
+  environment:
+   MYSQL_ROOT_PASSWORD: mallika
+   volumes:
+    -db:/var/lib/mysql
+
+ mywordpress:
+  image: wordpress
+  ports:
+   - 9999:80
+  volumes:
+   - wordpress:/var/www/html
+
+
+volumes:
+ db:
+ wordpress:
+
+
+===================================
+12th session
+
+Container Orchestration
+
+1. Docker Swarm
+
+Load balancing on Docker swarm
+
+Install dokcer swarm on manager instance
+docker swarm init
+
+root@Manager:~# docker swarm init
+Swarm initialized: current node (15es4b70dhhijt2pnzbkwwfpq) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-3bl34pdd3hofkdc0jkc4e4y3nvr3jxl1u663ok1slb2bwkxeby-0n0rnckrl91n7n3hnwz7oswc1 172.31.9.1:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+
+
+--------
+2.docker node ls
+
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+15es4b70dhhijt2pnzbkwwfpq *   Manager    Ready     Active         Leader           20.10.11
+ot81glxfr031ug4y0ymkij9pm     Worker1    Ready     Active                          20.10.11
+x44tofavvy99mhr3p68q9au2k     Worker2    Ready     Active                          20.10.11
+
+
+3.Docker swarn service:
+root@Manager:~# docker service create --name webserver -p 8888:80 --replicas 5 nginx
+unjkqapeiz6p5886qquq3but5
+overall progress: 5 out of 5 tasks
+1/5: running   [==================================================>]
+2/5: running   [==================================================>]
+3/5: running   [==================================================>]
+4/5: running   [==================================================>]
+5/5: running   [==================================================>]
+verify: Service converged
+root@Manager:~# docker service ls
+ID             NAME        MODE         REPLICAS   IMAGE          PORTS
+unjkqapeiz6p   webserver   replicated   5/5        nginx:latest   *:8888->80/tcp
+
+
+5/5
+desired count/actual count
+
+4.
+root@Manager:~# docker service ps webserver
+ID             NAME          IMAGE          NODE      DESIRED STATE   CURRENT STATE                ERROR     PORTS
+ofk4h1o7d097   webserver.1   nginx:latest   Worker2   Running         Running about a minute ago
+mxczuy94nd1t   webserver.2   nginx:latest   Worker1   Running         Running about a minute ago
+3oecwgdha87v   webserver.3   nginx:latest   Manager   Running         Running about a minute ago
+jear0wx64ddg   webserver.4   nginx:latest   Worker2   Running         Running about a minute ago
+cufveftqg2au   webserver.5   nginx:latest   Worker1   Running         Running about a minute ago
+
+
+
+5. Delete a service: all the services present in manager, worker1 and worker2 will be deleted
+
+docker service rm <name of service>
+
+6.
+root@Manager:~# docker service ps mydb
+ID             NAME         IMAGE      NODE      DESIRED STATE   CURRENT STATE             ERROR                       PORTS
+9kk34aygvxsx   mydb.1       3:latest   Worker1   Ready           Rejected 1 second ago     "No such image: 3:latest"
+jomhf1awqmvx    \_ mydb.1   3:latest   Worker2   Shutdown        Rejected 6 seconds ago    "No such image: 3:latest"
+c7w7pf2m8qqd    \_ mydb.1   3:latest   Manager   Shutdown        Rejected 11 seconds ago   "No such image: 3:latest"
+aylyvcfvnx6v    \_ mydb.1   3:latest   Worker1   Shutdown        Rejected 16 seconds ago   "No such image: 3:latest"
+u8nvg3vt1qb6    \_ mydb.1   3:latest   Worker2   Shutdown        Rejected 21 seconds ago   "No such image: 3:latest"
+
+7. Scaling
+To increse the docker containers
+docker service scale appserver=8
+
+Docker swarm doesn't support scaling directly
+
+8.
+root@Manager:~# docker service create --name myredis --repicas 5 redis:3
+unknown flag: --repicas
+See 'docker service create --help'.
+root@Manager:~# docker service create --name myredis --replicas 5 redis:3
+moq7s2ovjmvec9ll1xy8id7mk
+overall progress: 5 out of 5 tasks
+1/5: running   [==================================================>]
+2/5: running   [==================================================>]
+3/5: running   [==================================================>]
+4/5: running   [==================================================>]
+5/5: running   [==================================================>]
+verify: Service converged
+root@Manager:~# docker service ps redis
+no such service: redis
+root@Manager:~# docker service ps myredis
+ID             NAME        IMAGE     NODE      DESIRED STATE   CURRENT STATE            ERROR     PORTS
+v3oe4ncjltyy   myredis.1   redis:3   Worker1   Running         Running 47 seconds ago
+o5cz3d6q706o   myredis.2   redis:3   Worker2   Running         Running 47 seconds ago
+j873eo9om6w5   myredis.3   redis:3   Worker1   Running         Running 47 seconds ago
+9n3x0n15rz5p   myredis.4   redis:3   Manager   Running         Running 48 seconds ago
+oej8aku00p3m   myredis.5   redis:3   Worker2   Running         Running 47 seconds ago
+root@Manager:~# docker service update --image redis:4 myredis
+myredis
+overall progress: 5 out of 5 tasks
+1/5: running   [==================================================>]
+2/5: running   [==================================================>]
+3/5: running   [==================================================>]
+4/5: running   [==================================================>]
+5/5: running   [==================================================>]
+verify: Service converged
+root@Manager:~# docker service ps myredis
+ID             NAME            IMAGE     NODE      DESIRED STATE   CURRENT STATE             ERROR     PORTS
+7uxgzvmlcgt9   myredis.1       redis:4   Manager   Running         Running 24 seconds ago
+v3oe4ncjltyy    \_ myredis.1   redis:3   Worker1   Shutdown        Shutdown 27 seconds ago
+kiohugcrfcbf   myredis.2       redis:4   Worker2   Running         Running 12 seconds ago
+o5cz3d6q706o    \_ myredis.2   redis:3   Worker2   Shutdown        Shutdown 16 seconds ago
+vhzfzx9pjm4l   myredis.3       redis:4   Worker1   Running         Running 17 seconds ago
+j873eo9om6w5    \_ myredis.3   redis:3   Worker1   Shutdown        Shutdown 21 seconds ago
+xs5rz9zzgwlu   myredis.4       redis:4   Manager   Running         Running 22 seconds ago
+9n3x0n15rz5p    \_ myredis.4   redis:3   Manager   Shutdown        Shutdown 23 seconds ago
+dqebxlr1ykav   myredis.5       redis:4   Worker2   Running         Running 10 seconds ago
+oej8aku00p3m    \_ myredis.5   redis:3   Worker2   Shutdown        Shutdown 10 seconds ago
+
+10.
+root@Manager:~# docker service ps myredis |grep \_
+v3oe4ncjltyy    \_ myredis.1   redis:3   Worker1   Shutdown        Shutdown 7 minutes ago
+o5cz3d6q706o    \_ myredis.2   redis:3   Worker2   Shutdown        Shutdown 6 minutes ago
+j873eo9om6w5    \_ myredis.3   redis:3   Worker1   Shutdown        Shutdown 7 minutes ago
+9n3x0n15rz5p    \_ myredis.4   redis:3   Manager   Shutdown        Shutdown 7 minutes ago
+oej8aku00p3m    \_ myredis.5   redis:3   Worker2   Shutdown        Shutdown 6 minutes ago
+root@Manager:~# docker service ps myredis |grep -v \_
+ID             NAME            IMAGE     NODE      DESIRED STATE   CURRENT STATE            ERROR     PORTS
+7uxgzvmlcgt9   myredis.1       redis:4   Manager   Running         Running 7 minutes ago
+kiohugcrfcbf   myredis.2       redis:4   Worker2   Running         Running 7 minutes ago
+vhzfzx9pjm4l   myredis.3       redis:4   Worker1   Running         Running 7 minutes ago
+xs5rz9zzgwlu   myredis.4       redis:4   Manager   Running         Running 7 minutes ago
+dqebxlr1ykav   myredis.5       redis:4   Worker2   Running         Running 7 minutes ago
+
+11.
+docker service update --rollback myredis
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+13th session:
+
+
+=============================
+1.docker node update --availability drain Worker1
+
+
+root@Manager:~# docker nodee ls
+docker: 'nodee' is not a docker command.
+See 'docker --help'
+root@Manager:~# docker node ls
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+15es4b70dhhijt2pnzbkwwfpq *   Manager    Ready     Active         Leader           20.10.11
+ot81glxfr031ug4y0ymkij9pm     Worker1    Ready     Active                          20.10.11
+x44tofavvy99mhr3p68q9au2k     Worker2    Ready     Active                          20.10.11
+root@Manager:~#
+root@Manager:~#
+root@Manager:~# docker node update --availability drain Worker1
+Worker1
+root@Manager:~# docker node ls
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+15es4b70dhhijt2pnzbkwwfpq *   Manager    Ready     Active         Leader           20.10.11
+ot81glxfr031ug4y0ymkij9pm     Worker1    Ready     Drain                           20.10.11
+x44tofavvy99mhr3p68q9au2k     Worker2    Ready     Active                          20.10.11
+
+
+2.docker swarm leave --- the worker node can also leave itself by this command executed in worker node
+
+3.root@Manager:~# docker node rm Worker2
+Worker2
+root@Manager:~#
+root@Manager:~#
+root@Manager:~# docker node ls
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+15es4b70dhhijt2pnzbkwwfpq *   Manager    Ready     Active         Leader           20.10.11
+ot81glxfr031ug4y0ymkij9pm     Worker1    Ready     Active                          20.10.11
+
+
+4.To regenerate the docker swarm that got removed can use below command
+
+docker swarm join-token worker
+
+5.
+docker swarm join-token manager
+
+6.root@Manager:~# docker node promote Worker1
+Node Worker1 promoted to a manager in the swarm.
+
+root@Manager:~# docker node promote Worker1
+Node Worker1 promoted to a manager in the swarm.
+root@Manager:~#
+root@Manager:~#
+root@Manager:~# docker node ls
+ID                            HOSTNAME   STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+15es4b70dhhijt2pnzbkwwfpq *   Manager    Ready     Active         Leader           20.10.11
+ot81glxfr031ug4y0ymkij9pm     Worker1    Ready     Active         Reachable        20.10.11
+75pk9jtn7hgnsflppt579wqhe     Worker2    Ready     Active                          20.10.11
+
+
+
+
+7.
+root@Manager:~# docker service create --name webserver -p 8989:80 --replicas 6 httpd
+paf6r31tm99cmw8u3kqyw9nd2
+overall progress: 6 out of 6 tasks
+1/6: running   [==================================================>]
+2/6: running   [==================================================>]
+3/6: running   [==================================================>]
+4/6: running   [==================================================>]
+5/6: running   [==================================================>]
+6/6: running   [==================================================>]
+verify: Service converged
+root@Manager:~#
+root@Manager:~#
+root@Manager:~#
+root@Manager:~# docker service ps webserver
+ID             NAME          IMAGE          NODE      DESIRED STATE   CURRENT STATE            ERROR     PORTS
+q3wgbgsvgx6m   webserver.1   httpd:latest   Worker1   Running         Running 17 seconds ago
+ac7ny430vzex   webserver.2   httpd:latest   Worker2   Running         Running 17 seconds ago
+16n7w4ojo0oj   webserver.3   httpd:latest   Manager   Running         Running 15 seconds ago
+84h3c1hukp0y   webserver.4   httpd:latest   Worker1   Running         Running 17 seconds ago
+cmzuu4r9w2wq   webserver.5   httpd:latest   Worker2   Running         Running 17 seconds ago
+pznykkq78rpm   webserver.6   httpd:latest   Manager   Running         Running 15 seconds ago
+
+
+9.docker swarm leave
+Node left the swarm.
+
+
+10.
+root@Manager:~# docker swarm join-token manager
+To add a manager to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-3bl34pdd3hofkdc0jkc4e4y3nvr3jxl1u663ok1slb2bwkxeby-eqmhb5xcfnw4hhjmgsqcfjj2b 172.31.9.1:2377
+
+root@Manager:~#
+root@Manager:~#
+root@Manager:~#
+root@Manager:~#
+root@Manager:~# docker node ls
+ID                            HOSTNAME          STATUS    AVAILABILITY   MANAGER STATUS   ENGINE VERSION
+15es4b70dhhijt2pnzbkwwfpq *   Manager           Ready     Active         Leader           20.10.11
+ot81glxfr031ug4y0ymkij9pm     Worker1           Ready     Active         Reachable        20.10.11
+75pk9jtn7hgnsflppt579wqhe     Worker2           Ready     Drain                           20.10.11
+rc4mviwioz8kykspv8m3ct3vb     ip-172-31-1-27    Ready     Active         Reachable        20.10.11
+w0kf4ekmn1uugel2lg4lgl7d9     ip-172-31-9-107   Ready     Active         Reachable        20.10.11
+
+
+11. Manager node cannot leave by using below command
+docker swarm leave
+Error response from daemon: You are attempting to leave the swarm on a node that is participating as a manager. The only way to restore a swarm that has lost consensus is to reinitialize it with `--force-new-cluster`. Use `--force` to suppress this message.
+
+
+
+docker swarm leave --force
+Node left the swarm.
+
+
+12.
+
+From 3 manager node if we create 2 managers below error comes and canot execute ay command in the main manager node which is active
+root@Manager:~# docker service ps web
+Error response from daemon: rpc error: code = Unknown desc = The swarm does not have a leader. It's possible that too few managers are online. Make sure more than half of the managers are online.
+
+
+13.docker swarm init --force-new-cluster
+forciblily recreating a cluster is not a good practise as it will disturb network gets discturbers and services running will be disturbed
+
+
+
+---------------------------------------------------------------------------------
+How Failureover scenarious can be handled
+
+
+
+
+On worker2:
+docker swarm leave
+Node left the swarm.
+
+In manager node: remove worker node
+root@Manager:~# docker node rm ip-172-31-2-126
+ip-172-31-2-126
+
+Run below commnad in manager to again create worker 2 node
+docker swarm join --token SWMTKN-1-1ra3q7qm3tq628iig5k0fjf33fnevp0u5hrpxhop8lgzs9gkj1-71g98k4odvrnembfwergxe2z0 172.31.10.35:2377
+
+
+
+
+
+1.
+docker service ls
+ID        NAME      MODE      REPLICAS   IMAGE     PORTS
+root@Manager:~# docker network ls
+NETWORK ID     NAME              DRIVER    SCOPE
+eaf43f27e4f9   bridge            bridge    local
+a75f4663466a   docker_gwbridge   bridge    local
+039001270cb1   host              host      local
+lws1e0n0z06t   ingress           overlay   swarm
+464b42af7399   none              null      local
+
+2.root@Manager:~# docker service ls
+ID        NAME      MODE      REPLICAS   IMAGE     PORTS
+root@Manager:~# docker network ls
+NETWORK ID     NAME              DRIVER    SCOPE
+eaf43f27e4f9   bridge            bridge    local
+a75f4663466a   docker_gwbridge   bridge    local
+039001270cb1   host              host      local
+lws1e0n0z06t   ingress           overlay   swarm
+464b42af7399   none              null      local
+root@Manager:~#
+root@Manager:~#
+root@Manager:~# docker service create --name mywebserver -p 8888:80 --replicas 5 nginx
+yp1hzktg0uo2tz9j3tqbtoaqa
+overall progress: 5 out of 5 tasks
+1/5: running   [==================================================>]
+2/5: running   [==================================================>]
+3/5: running   [==================================================>]
+4/5: running   [==================================================>]
+5/5: running   [==================================================>]
+verify: Service converged
+root@Manager:~# docker service ps
+"docker service ps" requires at least 1 argument.
+See 'docker service ps --help'.
+
+Usage:  docker service ps [OPTIONS] SERVICE [SERVICE...]
+
+List the tasks of one or more services
+root@Manager:~# docker service ps mywebserver
+ID             NAME            IMAGE          NODE              DESIRED STATE   CURRENT STATE            ERROR     PORTS
+o2vba5644uq4   mywebserver.1   nginx:latest   ip-172-31-10-47   Running         Running 31 seconds ago
+mqhgcb2oylne   mywebserver.2   nginx:latest   ip-172-31-2-126   Running         Running 30 seconds ago
+r27sev9cea5g   mywebserver.3   nginx:latest   Manager           Running         Running 32 seconds ago
+8eftdzhmgdbj   mywebserver.4   nginx:latest   ip-172-31-10-47   Running         Running 31 seconds ago
+tpianklq7u51   mywebserver.5   nginx:latest   ip-172-31-2-126   Running         Running 30 seconds ago
+root@Manager:~#
+root@Manager:~#
+root@Manager:~#
+root@Manager:~# docker service scale mywebserver=1
+mywebserver scaled to 1
+overall progress: 1 out of 1 tasks
+1/1: running   [==================================================>]
+verify: Waiting 1 seconds to verify that tasks are stable...
+
+
+3.To create a network
+ docker network create --driver overlay mallika1
+
+4.To create a container in docker swarm over a network
+docker service create --name myweb -p 8080:80 --replicas 6 --network mallika1 httpd
+
+
+5.Used to show the info in jeson file format
+docker service inspect myweb
+
+docker service inspect myweb --pretty
+
+ID:             k1n30075zpp3365ptzyiyas3g
+Name:           myweb
+Service Mode:   Replicated
+ Replicas:      6
+Placement:
+UpdateConfig:
+ Parallelism:   1
+ On failure:    pause
+ Monitoring Period: 5s
+ Max failure ratio: 0
+ Update order:      stop-first
+RollbackConfig:
+ Parallelism:   1
+ On failure:    pause
+ Monitoring Period: 5s
+ Max failure ratio: 0
+ Rollback order:    stop-first
+ContainerSpec:
+ Image:         httpd:latest@sha256:1d71eef54c08435c0be99877c408637f03112dc9f929fba3cccdd15896099b02
+ Init:          false
+Resources:
+Networks: mallika1
+Endpoint Mode:  vip
+Ports:
+ PublishedPort = 9999
+  Protocol = tcp
+  TargetPort = 80
+  PublishMode = ingress
+
+
+
+5. To change the network to deafult 
+docker service create --name t1 -p 7777:8080 --replicas 6 tomcat
+
+6.To change the network to specific network
+
+docker service update --network-add mallika2 t1
+
+7.To rollback the network to deafult
+
+docker service update --network-rm mallika2 t1
+
+
+Docker Stack
+============
+docker stack deploy -c stack2.yml ci-cd
+
+ci-cd is the name 
+
+
+
+ vi stack2.yml
+root@Manager:~#
+root@Manager:~# docker stack deploy -c stack2.yml ci-cd
+Creating network ci-cd_default
+Creating service ci-cd_proderver
+Creating service ci-cd_myjenkins
+Creating service ci-cd_qaserver
+root@Manager:~# cat stack2.yml
+version: '3.8'
+
+services:
+ myjenkins:
+  image: jenkins/jenkins
+  ports:
+   - 5050:8080
+  deploy:
+    replicas: 2
+    placement:
+     constraints:
+       - node.hostname == Manager
+
+ qaserver:
+  image: tomcat
+  ports:
+   - 6060:8080
+  deploy:
+    replicas: 3
+    placement:
+     constraints:
+       - node.hostname == Worker1
+
+ proderver:
+  image: tomcat
+  ports:
+   - 7070:8080
+  deploy:
+    replicas: 4
+    placement:
+     constraints:
+       - node.hostname == Worker2
+       - node.hostname == Worker1
+
+
+
+
+root@Manager:~# docker stack ps ci-cd
+ID             NAME                IMAGE                    NODE      DESIRED STATE   CURRENT STATE                ERROR                              PORTS
+ps2eg2ohrxto   ci-cd_myjenkins.1   jenkins/jenkins:latest   Manager   Running         Running about a minute ago
+rm2apo0j4sxn   ci-cd_myjenkins.2   jenkins/jenkins:latest   Manager   Running         Running about a minute ago
+5eeqf2ref6u0   ci-cd_proderver.1   tomcat:latest                      Running         Pending about a minute ago   "no suitable node (scheduling …"
+xk3v57wsptnh   ci-cd_proderver.2   tomcat:latest                      Running         Pending about a minute ago   "no suitable node (scheduling …"
+mguw6cx1rfyt   ci-cd_proderver.3   tomcat:latest                      Running         Pending about a minute ago   "no suitable node (scheduling …"
+6i07wma2irer   ci-cd_proderver.4   tomcat:latest                      Running         Pending about a minute ago   "no suitable node (scheduling …"
+jlt15bsryysw   ci-cd_qaserver.1    tomcat:latest                      Running         Pending about a minute ago   "no suitable node (scheduling …"
+o6xztphurjtb   ci-cd_qaserver.2    tomcat:latest                      Running         Pending about a minute ago   "no suitable node (scheduling …"
+krnz0l9axtcn   ci-cd_qaserver.3    tomcat:latest                      Running         Pending about a minute ago   "no suitable node (scheduling …"
+-----
+
+root@Manager:~# vi stack2.yml
+root@Manager:~#
+root@Manager:~#
+root@Manager:~#
+root@Manager:~# docker stack deploy -c stack2.yml selenium
+Creating network selenium_default
+Creating service selenium_hub
+Creating service selenium_chrome
+Creating service selenium_firefox
+root@Manager:~# cat stack2.yml
+version: '3.8'
+
+services:
+ hub:
+  image: selenium/hub
+  ports:
+   - 6060:4444
+  deploy:
+   replicas: 2
+   resources:
+    limits:
+     cpus: "0.1"
+     memory: "300M"
+
+ chrome:
+  image: selenium/node-chrome-debug
+  ports:
+   - 5901:5900
+  deploy:
+   replicas: 3
+   resources:
+    limits:
+     cpus: "0.2"
+     memory: "350M"
+
+ firefox:
+  image: selenium/node-firefox-debug
+  ports:
+   - 5902:5900
+  deploy:
+   replicas: 3
+   resources:
+    limits:
+     cpus: "0.2"
+     memory: "350M"
+---------
+
+
+
+Docker secrets:
+
+1. To create a secreat
+echo "Hello World" | docker secret create mysecret -
+
+root@Manager:~# docker service create --name myredis --replicas 5 --secret mysecret redis
+mhl3ezp62m0mrijfmhgweg8vz
+overall progress: 5 out of 5 tasks
+1/5: running   [==================================================>]
+2/5: running   [==================================================>]
+3/5: running   [==================================================>]
+4/5: running   [==================================================>]
+5/5: running   [==================================================>]
+verify: Service converged
+root@Manager:~#
+root@Manager:~#
+root@Manager:~# docker service ps myredis
+ID             NAME        IMAGE          NODE              DESIRED STATE   CURRENT STATE            ERROR     PORTS
+ohbdfr3emq3i   myredis.1   redis:latest   Manager           Running         Running 30 seconds ago
+slrdl52d9f1z   myredis.2   redis:latest   ip-172-31-2-126   Running         Running 33 seconds ago
+p1ns20eg8zvd   myredis.3   redis:latest   ip-172-31-10-47   Running         Running 33 seconds ago
+y10q5hth13o6   myredis.4   redis:latest   Manager           Running         Running 30 seconds ago
+7ecle597uzge   myredis.5   redis:latest   ip-172-31-2-126   Running         Running 33 seconds ago
+root@Manager:~#
+root@Manager:~#
+root@Manager:~# docker conatiner ls
+docker: 'conatiner' is not a docker command.
+See 'docker --help'
+root@Manager:~# docker container ls
+CONTAINER ID   IMAGE                                COMMAND                  CREATED          STATUS          PORTS      NAMES
+10fedfa79bc4   redis:latest                         "docker-entrypoint.s…"   56 seconds ago   Up 54 seconds   6379/tcp   myredis.1.ohbdfr3emq3i0ehpmvqgpm7u5
+9bfaf306d87f   redis:latest                         "docker-entrypoint.s…"   56 seconds ago   Up 54 seconds   6379/tcp   myredis.4.y10q5hth13o6xnq2iqp05rxio
+5d9916d3179e   selenium/node-chrome-debug:latest    "/opt/bin/entry_poin…"   6 minutes ago    Up 6 minutes    5900/tcp   selenium_chrome.2.uy512lx8pm3no1j81h1zw5f55
+e2ded797f2f7   selenium/node-firefox-debug:latest   "/opt/bin/entry_poin…"   6 minutes ago    Up 6 minutes    5900/tcp   selenium_firefox.1.pvhkr561f6v4okbs3atgfxryd
+root@Manager:~#
+root@Manager:~#
+root@Manager:~#
+root@Manager:~# cd /
+root@Manager:/# ls
+bin  boot  dev  etc  home  lib  lib32  lib64  libx32  lost+found  media  mnt  opt  proc  root  run  sbin  snap  srv  sys  tmp  usr  var
+root@Manager:/# cd run/
+root@Manager:/run#
+root@Manager:/run# ls
+NetworkManager  atd.pid        containerd    dbus             docker.pid   lock          mount           sendsigs.omit.d    snapd.socket  systemd     user
+acpid.pid       blkid          crond.pid     dmeventd-client  docker.sock  log           multipathd.pid  shm                sshd          tmpfiles.d  utmp
+acpid.socket    cloud-init     crond.reboot  dmeventd-server  initctl      lvm           netns           snapd              sshd.pid      udev        uuidd
+agetty.reload   console-setup  cryptsetup    docker           irqbalance   motd.dynamic  screen          snapd-snap.socket  sudo          udisks2     xtables.lock
+root@Manager:/run#
+root@Manager:/run#
+root@Manager:/run#
+root@Manager:/run# docker exec -it 10fedfa79bc4 bash
+root@10fedfa79bc4:/data#
+root@10fedfa79bc4:/data# cd /run/secrets/
+root@10fedfa79bc4:/run/secrets# ls
+mysecret
+root@10fedfa79bc4:/run/secrets# cat mysecret
+Hello World
+root@10fedfa79bc4:/run/secrets# exit
+exit
+
+
+
+---------
+Vijaymallika@34
+
+
+
+
+--------------------------------------------
+

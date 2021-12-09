@@ -1,0 +1,602 @@
+
+Replication Controller:
+
+1.
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f replication-controller.yml
+replicationcontroller/httpd-rc created
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ cat replication-controller.yml
+apiVersion: v1
+kind: ReplicationController
+metadata:
+ name: httpd-rc
+ labels:
+  author: mallika
+  type: webserver
+spec:
+ replicas: 3
+ template:
+  metadata:
+   name: httpd-pod
+   labels:
+    type: webserver
+  spec:
+   containers:
+    - name: myhttpd
+      image: httpd
+      ports:
+       - containerPort: 80
+         hostPort: 8080
+
+
+
+2.
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get all
+NAME                 READY   STATUS    RESTARTS   AGE
+pod/httpd-rc-qp96h   1/1     Running   0          3m2s
+pod/httpd-rc-z65xm   1/1     Running   0          3m2s
+pod/httpd-rc-zmdn4   1/1     Running   0          3m2s
+
+NAME                             DESIRED   CURRENT   READY   AGE
+replicationcontroller/httpd-rc   3         3         3       3m2s
+
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.8.0.1     <none>        443/TCP   25m
+
+
+
+---
+
+
+3.
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f replicasset.yml
+replicaset.apps/tomcat-rs created
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ cat replicasset.yml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+ name: tomcat-rs
+ labels:
+  author: mallika
+  type: appserver
+spec:
+ replicas: 3
+ selector:
+  matchLabels:
+   type: appserver
+ template:
+  metadata:
+   name: tomcat-pod
+   labels:
+    type: appserver
+  spec:
+   containers:
+     - name: mytomcat
+       image: tomcat
+       ports:
+        - containerPort: 8080
+          hostPort: 9090
+
+
+
+4. Scaling
+for scaling change the replicas count and run below command for changes to reflect
+
+
+4a.
+Once the pod is created and later if we modify .yml file then use below command to make necessary changes
+kubectl replace -f replicasset.yml
+
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl replace -f replicasset.yml
+replicaset.apps/tomcat-rs replaced
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get pods
+NAME              READY   STATUS    RESTARTS   AGE
+tomcat-rs-fwrtd   1/1     Running   0          4m14s
+tomcat-rs-rjsvj   1/1     Running   0          4m14s
+tomcat-rs-ssfpl   1/1     Running   0          4m14s
+tomcat-rs-zrtdh   0/1     Pending   0          77s                    //newly created pods
+
+
+4b.
+
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl scale --replicas=2 -f replicasset.yml
+replicaset.apps/tomcat-rs scaled
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get all
+NAME                  READY   STATUS    RESTARTS   AGE
+pod/tomcat-rs-fwrtd   1/1     Running   0          7m17s
+pod/tomcat-rs-rjsvj   1/1     Running   0          7m17s
+
+NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.8.0.1     <none>        443/TCP   70m
+
+NAME                        DESIRED   CURRENT   READY   AGE
+replicaset.apps/tomcat-rs   2         2         2       7m18s
+
+
+
+command to get access to ports that are accessible over internet
+---------------------------------------------------------
+
+gcloud compute firewall-rules create myrule --allow tcp:8080
+
+-------------------------------------
+
+
+Namespace
+================
+
+Welcome to Cloud Shell! Type "help" to get started.
+Your Cloud Platform project in this session is set to mimetic-slice-333811.
+Use “gcloud config set project [PROJECT_ID]” to change to a different project.
+apiVersion: v1
+mallikanmallu@cloudshell:~ (mimetic-slice-333811)$ https://www.youtube.com/watch?v=tN1lGqfNh6c
+-bash: https://www.youtube.com/watch?v=tN1lGqfNh6c: No such file or directory
+mallikanmallu@cloudshell:~ (mimetic-slice-333811)$ gcloud container clusters get-credentials cluster-1 --zone us-central1-c --project mimetic-slice-333811
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for cluster-1.
+mallikanmallu@cloudshell:~ (mimetic-slice-333811)$ cd mallika/
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ ls
+deployment1.yml  pod-definition1.yml  pod-definition2.yml  pod-definition3.yml  replicasset.yml  replication-controller.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get nodes
+NAME                                       STATUS   ROLES    AGE     VERSION
+gke-cluster-1-default-pool-9e42a6b7-1dgk   Ready    <none>   7m31s   v1.21.5-gke.1302
+gke-cluster-1-default-pool-9e42a6b7-gjzb   Ready    <none>   7m35s   v1.21.5-gke.1302
+gke-cluster-1-default-pool-9e42a6b7-nl85   Ready    <none>   7m34s   v1.21.5-gke.1302
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ ls -l
+total 24
+-rw-r--r-- 1 mallikanmallu mallikanmallu 374 Dec  5 11:32 deployment1.yml
+-rw-r--r-- 1 mallikanmallu mallikanmallu 155 Dec  2 16:58 pod-definition1.yml
+-rw-r--r-- 1 mallikanmallu mallikanmallu 302 Dec  2 17:11 pod-definition2.yml
+viVersion: v1
+-rw-r--r-- 1 mallikanmallu mallikanmallu 224 Dec  3 11:14 pod-definition3.yml
+-rw-r--r-- 1 mallikanmallu mallikanmallu 385 Dec  5 11:02 replicasset.yml
+-rw-r--r-- 1 mallikanmallu mallikanmallu 335 Dec  5 10:19 replication-controller.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ ls -lrt
+total 24
+-rw-r--r-- 1 mallikanmallu mallikanmallu 155 Dec  2 16:58 pod-definition1.yml
+-rw-r--r-- 1 mallikanmallu mallikanmallu 302 Dec  2 17:11 pod-definition2.yml
+-rw-r--r-- 1 mallikanmallu mallikanmallu 224 Dec  3 11:14 pod-definition3.yml
+-rw-r--r-- 1 mallikanmallu mallikanmallu 335 Dec  5 10:19 replication-controller.yml
+-rw-r--r-- 1 mallikanmallu mallikanmallu 385 Dec  5 11:02 replicasset.yml
+-rw-r--r-- 1 mallikanmallu mallikanmallu 374 Dec  5 11:32 deployment1.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ vi namespace.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get namespace
+NAME              STATUS   AGE
+default           Active   18m
+kube-node-lease   Active   18m
+kube-public       Active   18m
+viVersion: v1
+kube-system       Active   18m
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f namespace.yml
+namespace/test-ns created
+apiVersion: v1
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get namespace                                                                                           
+NAME              STATUS   AGE
+default           Active   19m
+kube-node-lease   Active   19m
+kube-public       Active   19m
+kube-system       Active   19m
+test-ns           Active   5s
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ vim pod-defintion4.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f pod-definition
+pod-definition1.yml  pod-definition2.yml  pod-definition3.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f pod-defintion4.yml
+error: error validating "pod-defintion4.yml": error validating data: apiVersion not set; if you choose to ignore these errors, turn validation off with --validate=false
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ ls
+deployment1.yml  namespace.yml  pod-definition1.yml  pod-definition2.yml  pod-definition3.yml  pod-defintion4.yml  replicasset.yml  replication-controller.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ mv pod-defintion4.yml pod-definition4.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ ls
+deployment1.yml  namespace.yml  pod-definition1.yml  pod-definition2.yml  pod-definition3.yml  pod-definition4.yml  replicasset.yml  replication-controller.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f pod-definition4.yml
+error: error validating "pod-definition4.yml": error validating data: apiVersion not set; if you choose to ignore these errors, turn validation off with --validate=false
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ vi pod-definition4.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f pod-definition4.yml                                                                            
+error: error validating "pod-definition4.yml": error validating data: apiVersion not set; if you choose to ignore these errors, turn validation off with --validate=false
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ vi pod-definition4.yml                                                                                          
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f pod-definition4.yml
+pod/ghost-pod created
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get pods
+No resources found in default namespace.
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get pods -n test-ns
+NAME        READY   STATUS    RESTARTS   AGE
+ghost-pod   1/1     Running   0          56s
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get pods -n test-ns -o wide
+NAME        READY   STATUS    RESTARTS   AGE     IP         NODE                                       NOMINATED NODE   READINESS GATES
+ghost-pod   1/1     Running   0          2m22s   10.4.0.3   gke-cluster-1-default-pool-9e42a6b7-nl85   <none>           <none>
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get nodes -o wide
+NAME                                       STATUS   ROLES    AGE   VERSION            INTERNAL-IP   EXTERNAL-IP     OS-IMAGE                             KERNEL-VERSION   CONTAINER-RUNTIME
+gke-cluster-1-default-pool-9e42a6b7-1dgk   Ready    <none>   31m   v1.21.5-gke.1302   10.128.0.19   34.123.168.91   Container-Optimized OS from Google   5.4.144+         containerd://1.4.8
+gke-cluster-1-default-pool-9e42a6b7-gjzb   Ready    <none>   31m   v1.21.5-gke.1302   10.128.0.18   35.202.44.58    Container-Optimized OS from Google   5.4.144+         containerd://1.4.8
+gke-cluster-1-default-pool-9e42a6b7-nl85   Ready    <none>   31m   v1.21.5-gke.1302   10.128.0.17   34.135.120.65   Container-Optimized OS from Google   5.4.144+         containerd://1.4.8
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ gcloud compute firewall-rules create myrule --allow tcp:8080
+Creating firewall...working..Created [https://www.googleapis.com/compute/v1/projects/mimetic-slice-333811/global/firewalls/myrule].
+Creating firewall...done.
+NAME: myrule
+NETWORK: default
+DIRECTION: INGRESS
+PRIORITY: 1000
+ALLOW: tcp:8080
+apiVersion: v1
+DENY:
+DISABLED: False
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ ^C
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ cat pod-definition4.yml
+apiVersion: v1
+kind: Pod
+metadata:
+apiVersion: v1
+ name: ghost-pod
+ namespace: test-ns
+ labels:
+  author: mallika
+spec:
+apiVersion: v1
+ containers:
+  - name: ghost
+    image: ghost
+    ports:
+     - containerPort: 2368
+       hostPort: 8080
+
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ ^C
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl delete -f pod-definition4.yml
+pod "ghost-pod" deleted
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get nodes
+NAME                                       STATUS   ROLES    AGE   VERSION
+gke-cluster-1-default-pool-9e42a6b7-1dgk   Ready    <none>   36m   v1.21.5-gke.1302
+gke-cluster-1-default-pool-9e42a6b7-gjzb   Ready    <none>   36m   v1.21.5-gke.1302
+gke-cluster-1-default-pool-9e42a6b7-nl85   Ready    <none>   36m   v1.21.5-gke.1302
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get pods
+No resources found in default namespace.
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl delete -f namespace.yml
+namespace "test-ns" deleted
+
+---------------------------------------------------------------------------------------------------------
+
+Volumes:
+
+===========
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ vim volumes.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f volumes.ymlerror: error validating "volumes.yml": error validating data: [ValidationError(Pod.metadata): unknown field "author" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta, ValidationError(Pod.metadata): unknown field "type" in io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta]; if you choose to ignore these errors, turn validation off with --validate=false
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ vim volumes.yml                                                                                                 
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ mv volumes.yml volumes1.yml                                                                                     
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ vim volumes1.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f volumes1.yml
+pod/redis-pod created
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ cat volumes1.yml
+apiVersion: v1
+kind: Pod
+metadata:
+ name: redis-pod
+ labels:
+  type: db
+  author: mallika
+spec:
+ containers:
+  - name: myredis
+    image: redis
+    volumeMounts:
+     - name: redis-volume
+       mountPath: /data/redis
+ volumes:
+  - name: redis-volume
+    emptyDir: {}
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get pods
+NAME        READY   STATUS    RESTARTS   AGE
+redis-pod   1/1     Running   0          41s
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl exec -it redis-pod -- bash
+root@redis-pod:/data# cd redis/
+root@redis-pod:/data/redis# ls
+root@redis-pod:/data/redis# cat > file1
+This file is created to learn kubernetes
+^C
+root@redis-pod:/data/redis# ps
+bash: ps: command not found
+root@redis-pod:/data/redis# apt-get update
+Get:1 http://security.debian.org/debian-security bullseye-security InRelease [44.1 kB]
+Get:2 http://deb.debian.org/debian bullseye InRelease [116 kB]
+Get:3 http://deb.debian.org/debian bullseye-updates InRelease [39.4 kB]
+Get:4 http://security.debian.org/debian-security bullseye-security/main amd64 Packages [97.5 kB]
+Get:5 http://deb.debian.org/debian bullseye/main amd64 Packages [8180 kB]
+Get:6 http://deb.debian.org/debian bullseye-updates/main amd64 Packages [2592 B]
+Fetched 8479 kB in 2s (4865 kB/s)                    
+Reading package lists... Done
+root@redis-pod:/data/redis# apt-get install procps
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  libgpm2 libncurses6 libncursesw6 libprocps8 psmisc
+Suggested packages:
+  gpm
+The following NEW packages will be installed:
+  libgpm2 libncurses6 libncursesw6 libprocps8 procps psmisc
+0 upgraded, 6 newly installed, 0 to remove and 0 not upgraded.
+Need to get 1034 kB of archives.
+After this operation, 3474 kB of additional disk space will be used.
+Do you want to continue? [Y/n] Y
+Get:1 http://deb.debian.org/debian bullseye/main amd64 libncurses6 amd64 6.2+20201114-2 [102 kB]
+Get:2 http://deb.debian.org/debian bullseye/main amd64 libncursesw6 amd64 6.2+20201114-2 [132 kB]
+Get:3 http://deb.debian.org/debian bullseye/main amd64 libprocps8 amd64 2:3.3.17-5 [63.9 kB]
+Get:4 http://deb.debian.org/debian bullseye/main amd64 procps amd64 2:3.3.17-5 [502 kB]
+Get:5 http://deb.debian.org/debian bullseye/main amd64 libgpm2 amd64 1.20.7-8 [35.6 kB]
+Get:6 http://deb.debian.org/debian bullseye/main amd64 psmisc amd64 23.4-2 [198 kB]
+Fetched 1034 kB in 0s (8605 kB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package libncurses6:amd64.
+(Reading database ... 6652 files and directories currently installed.)
+Preparing to unpack .../0-libncurses6_6.2+20201114-2_amd64.deb ...
+Unpacking libncurses6:amd64 (6.2+20201114-2) ...
+Selecting previously unselected package libncursesw6:amd64.
+Preparing to unpack .../1-libncursesw6_6.2+20201114-2_amd64.deb ...
+Unpacking libncursesw6:amd64 (6.2+20201114-2) ...
+Selecting previously unselected package libprocps8:amd64.
+Preparing to unpack .../2-libprocps8_2%3a3.3.17-5_amd64.deb ...
+Unpacking libprocps8:amd64 (2:3.3.17-5) ...
+Selecting previously unselected package procps.
+Preparing to unpack .../3-procps_2%3a3.3.17-5_amd64.deb ...
+Unpacking procps (2:3.3.17-5) ...
+Selecting previously unselected package libgpm2:amd64.
+Preparing to unpack .../4-libgpm2_1.20.7-8_amd64.deb ...
+Unpacking libgpm2:amd64 (1.20.7-8) ...
+Selecting previously unselected package psmisc.
+Preparing to unpack .../5-psmisc_23.4-2_amd64.deb ...
+Unpacking psmisc (23.4-2) ...
+Setting up libgpm2:amd64 (1.20.7-8) ...
+Setting up psmisc (23.4-2) ...
+Setting up libncurses6:amd64 (6.2+20201114-2) ...
+Setting up libncursesw6:amd64 (6.2+20201114-2) ...
+Setting up libprocps8:amd64 (2:3.3.17-5) ...
+Setting up procps (2:3.3.17-5) ...
+Processing triggers for libc-bin (2.31-13+deb11u2) ...
+root@redis-pod:/data/redis#
+root@redis-pod:/data/redis#
+root@redis-pod:/data/redis# ps
+    PID TTY          TIME CMD
+     20 pts/0    00:00:00 bash
+    354 pts/0    00:00:00 ps
+root@redis-pod:/data/redis#
+root@redis-pod:/data/redis#
+root@redis-pod:/data/redis#
+root@redis-pod:/data/redis# ps aux
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+redis          1  0.1  0.1  52820  6996 ?        Ssl  16:06   0:00 redis-server *:6379
+root          20  0.0  0.0   4080  3448 pts/0    Ss   16:08   0:00 bash
+root         355  0.0  0.0   6692  2972 pts/0    R+   16:10   0:00 ps aux
+root@redis-pod:/data/redis#
+root@redis-pod:/data/redis#
+root@redis-pod:/data/redis# kill 1
+root@redis-pod:/data/redis# command terminated with exit code 137
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get pod
+NAME        READY   STATUS    RESTARTS   AGE
+redis-pod   1/1     Running   1          5m7s
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl exec -it redis -- bash
+Error from server (NotFound): pods "redis" not found
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl exec -it redis-pod -- bash
+root@redis-pod:/data# cd redis/
+root@redis-pod:/data/redis# ls
+file1
+root@redis-pod:/data/redis# cat file1
+This file is created to learn kubernetes
+root@redis-pod:/data/redis# ps aux
+bash: ps: command not found
+root@redis-pod:/data/redis# apt-get update
+Get:1 http://security.debian.org/debian-security bullseye-security InRelease [44.1 kB]
+Get:2 http://deb.debian.org/debian bullseye InRelease [116 kB]                  
+Get:3 http://deb.debian.org/debian bullseye-updates InRelease [39.4 kB]
+Get:4 http://security.debian.org/debian-security bullseye-security/main amd64 Packages [97.5 kB]
+Get:5 http://deb.debian.org/debian bullseye/main amd64 Packages [8180 kB]
+Get:6 http://deb.debian.org/debian bullseye-updates/main amd64 Packages [2592 B]
+Fetched 8479 kB in 2s (4892 kB/s)                         
+Reading package lists... Done
+root@redis-pod:/data/redis# apt-get install procps
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  libgpm2 libncurses6 libncursesw6 libprocps8 psmisc
+Suggested packages:
+  gpm
+The following NEW packages will be installed:
+  libgpm2 libncurses6 libncursesw6 libprocps8 procps psmisc
+0 upgraded, 6 newly installed, 0 to remove and 0 not upgraded.
+Need to get 1034 kB of archives.
+After this operation, 3474 kB of additional disk space will be used.
+Do you want to continue? [Y/n] Y
+Get:1 http://deb.debian.org/debian bullseye/main amd64 libncurses6 amd64 6.2+20201114-2 [102 kB]
+Get:2 http://deb.debian.org/debian bullseye/main amd64 libncursesw6 amd64 6.2+20201114-2 [132 kB]
+Get:3 http://deb.debian.org/debian bullseye/main amd64 libprocps8 amd64 2:3.3.17-5 [63.9 kB]
+Get:4 http://deb.debian.org/debian bullseye/main amd64 procps amd64 2:3.3.17-5 [502 kB]
+Get:5 http://deb.debian.org/debian bullseye/main amd64 libgpm2 amd64 1.20.7-8 [35.6 kB]
+Get:6 http://deb.debian.org/debian bullseye/main amd64 psmisc amd64 23.4-2 [198 kB]
+Fetched 1034 kB in 0s (8197 kB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package libncurses6:amd64.
+(Reading database ... 6652 files and directories currently installed.)
+Preparing to unpack .../0-libncurses6_6.2+20201114-2_amd64.deb ...
+Unpacking libncurses6:amd64 (6.2+20201114-2) ...
+Selecting previously unselected package libncursesw6:amd64.
+Preparing to unpack .../1-libncursesw6_6.2+20201114-2_amd64.deb ...
+Unpacking libncursesw6:amd64 (6.2+20201114-2) ...
+Selecting previously unselected package libprocps8:amd64.
+Preparing to unpack .../2-libprocps8_2%3a3.3.17-5_amd64.deb ...
+Unpacking libprocps8:amd64 (2:3.3.17-5) ...
+Selecting previously unselected package procps.
+Preparing to unpack .../3-procps_2%3a3.3.17-5_amd64.deb ...
+Unpacking procps (2:3.3.17-5) ...
+Selecting previously unselected package libgpm2:amd64.
+Preparing to unpack .../4-libgpm2_1.20.7-8_amd64.deb ...
+Unpacking libgpm2:amd64 (1.20.7-8) ...
+Selecting previously unselected package psmisc.
+Preparing to unpack .../5-psmisc_23.4-2_amd64.deb ...
+Unpacking psmisc (23.4-2) ...
+Setting up libgpm2:amd64 (1.20.7-8) ...
+Setting up psmisc (23.4-2) ...
+Setting up libncurses6:amd64 (6.2+20201114-2) ...
+Setting up libncursesw6:amd64 (6.2+20201114-2) ...
+Setting up libprocps8:amd64 (2:3.3.17-5) ...
+Setting up procps (2:3.3.17-5) ...
+Processing triggers for libc-bin (2.31-13+deb11u2) ...
+root@redis-pod:/data/redis#
+root@redis-pod:/data/redis#
+root@redis-pod:/data/redis# ps aux
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+redis          1  0.1  0.1  52820  7016 ?        Ssl  16:11   0:00 redis-server *:6379
+root          21  0.0  0.0   4080  3464 pts/0    Ss   16:12   0:00 bash
+root         356  0.0  0.0   6692  2868 pts/0    R+   16:13   0:00 ps aux
+root@redis-pod:/data/redis#
+root@redis-pod:/data/redis# apt-get install get
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+E: Unable to locate package get
+
+root@redis-pod:/data/redis# [s aux
+bash: [s: command not found
+root@redis-pod:/data/redis# ps aux
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+redis          1  0.1  0.1  52820  7016 ?        Ssl  16:11   0:00 redis-server *:6379
+root          21  0.0  0.0   4080  3464 pts/0    Ss   16:12   0:00 bash
+root        3106  0.0  0.0   6692  2920 pts/0    R+   16:15   0:00 ps aux
+
+---------------------------------------------------------------------------
+Service object:
+================
+
+1.Cluster IP
+2.Node Port
+3.Load balancer
+
+
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f pod-definition1.yml
+pod/nginx-pod created
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ vim service1.yml
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f service1.yml
+The Service "nginx-service" is invalid: spec.ports[0].nodePort: Invalid value: 3008: provided port is not in the valid range. The range of valid ports is 30000-32767
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ vim service1.yml                                                                                                
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl apply -f service1.yml
+service/nginx-service created
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get pods -o wide
+NAME        READY   STATUS    RESTARTS   AGE   IP         NODE                                       NOMINATED NODE   READINESS GATES
+nginx-pod   1/1     Running   0          10m   10.4.0.5   gke-cluster-1-default-pool-9e42a6b7-nl85   <none>           <none>
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ kubectl get nodes -o wide
+NAME                                       STATUS   ROLES    AGE   VERSION            INTERNAL-IP   EXTERNAL-IP     OS-IMAGE                             KERNEL-VERSION   CONTAINER-RUNTIME
+gke-cluster-1-default-pool-9e42a6b7-1dgk   Ready    <none>   89m   v1.21.5-gke.1302   10.128.0.19   34.123.168.91   Container-Optimized OS from Google   5.4.144+         containerd://1.4.8
+gke-cluster-1-default-pool-9e42a6b7-gjzb   Ready    <none>   89m   v1.21.5-gke.1302   10.128.0.18   35.202.44.58    Container-Optimized OS from Google   5.4.144+         containerd://1.4.8
+gke-cluster-1-default-pool-9e42a6b7-nl85   Ready    <none>   89m   v1.21.5-gke.1302   10.128.0.17   34.135.120.65   Container-Optimized OS from Google   5.4.144+         containerd://1.4.8
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ gcloud compute firewall-rules create myrule --allow tcp:30008
+Creating firewall...failed.
+ERROR: (gcloud.compute.firewall-rules.create) Could not fetch resource:
+ - The resource 'projects/mimetic-slice-333811/global/firewalls/myrule' already exists
+
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ gcloud compute firewall-rules create myrule1 --allow tcp:30008
+Creating firewall...working..Created [https://www.googleapis.com/compute/v1/projects/mimetic-slice-333811/global/firewalls/myrule1].
+Creating firewall...done.
+NAME: myrule1
+NETWORK: default
+DIRECTION: INGRESS
+PRIORITY: 1000
+ALLOW: tcp:30008
+DENY:
+DISABLED: False
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ gcloud compute firewall-rules create myrule --allow tcp:30008^C
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ cat service1.yml
+apiVersion: v1
+kind: Service
+metadata:
+ name: nginx-service
+ labels:
+  author: mallika
+spec:
+ type: NodePort
+ ports:
+  - targetPort: 80
+    port: 80
+    nodePort: 30008
+ selector:
+  author: mallika
+  type: proxy
+mallikanmallu@cloudshell:~/mallika (mimetic-slice-333811)$ cat pod-definition1.yml
+apiVersion: v1
+kind: Pod
+metadata:
+ name: nginx-pod
+ labels:
+  author: mallika
+  type: proxy
+spec:
+ containers:
+  - name : webserver
+    image: nginx
+
+================================================================================================
+
+
+
+Load Balancer:
+
+Name
+Status
+Type
+Endpoints
+Pods
+Namespace
+Clusters
+jenkins-service	
+ OK	External load balancer	
+34.70.56.216:8080 	0/0	default	
+cluster-1	
+
+
+
+
+
+
+
+
+

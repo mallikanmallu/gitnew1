@@ -1,0 +1,3 @@
+create secondary ebs volume and attach it to ec2
+create snapshot from the ebs volume
+then delete that volume

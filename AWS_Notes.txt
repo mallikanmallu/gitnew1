@@ -1,0 +1,353 @@
+#!/bin/bash
+sudo su
+yum update -y
+yum install httpd -y
+echo "<html><h1> Welcome to Whizlabs Server 1 </h1></html>" >> /var/www/html/index.html
+systemctl start httpd
+systemctl enable httpd
+----------------------------------------------------------------------------------------------------------------------------------
+
+curl http://169.254.169.254/latest/meta-data/
+
+curl http://169.254.169.254/latest/user-data/
+
+-------------------------------------------------------------------------------------------------------------------
+
+
+sudo su
+yum update -y
+
+yum install -y httpd.x86_64
+systemctl 
+start httpd.service
+
+systemctl enable httpd.service
+
+echo "Hello World from $(hostname -f)" > /var/www/html/index.html
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+https://s3-multipart-final1.s3.amazonaws.com/Gopala.mp4
+
+Syntax: aws s3api create-multipart-upload --bucket [Bucket name] --key [original file name]
+
+Example: 
+-----------------------
+aws s3api create-multipart-upload --bucket s3-multipart-final1 --key Gopala.mp4
+
+--------------------------------------------------
+[root@ip-172-31-86-248 whizlabs]# aws s3api create-multipart-upload --bucket s3-multipart-final1 --key Gopala.mp4
+{
+    "Bucket": "s3-multipart-final1", 
+    "UploadId": "y05ZUlfPG92GOiLjCaG6CagzeLNq5164Ibo71iOT9r._zqJKu3Lgc8RncdXctHhAGAdaK51IAx5t1sHxwtRRO2qU9Cr6eAeZnL_X0Bjxq
+1KwJ1.4OKn_6pSy6fSViTA5S.EUvSEyh5J2AvstF.4eCg--", 
+    "Key": "Gopala.mp4"
+}
+
+-------------------------------------
+
+y05ZUlfPG92GOiLjCaG6CagzeLNq5164Ibo71iOT9r._zqJKu3Lgc8RncdXctHhAGAdaK51IAx5t1sHxwtRRO2qU9Cr6eAeZnL_X0Bjxq
+1KwJ1.4OKn_6pSy6fSViTA5S.EUvSEyh5J2AvstF.4eCg--
+
+Syntax: aws s3api upload-part --bucket [bucketname] --key [filename] --part-number [number] --body [chunk file name] --upload-id [id]
+
+Example: 
+
+aws s3api upload-part --bucket s3-multipart-final1 --key Gopala.mp4 --part-number 1 --body xaa --upload-id y05ZUlfPG92GOiLjCaG6CagzeLNq5164Ibo71iOT9r._zqJKu3Lgc8RncdXctHhAGAdaK51IAx5t1sHxwtRRO2qU9Cr6eAeZnL_X0Bjxq
+1KwJ1.4OKn_6pSy6fSViTA5S.EUvSEyh5J2AvstF.4eCg--
+
+
+
+------------------------
+
+[root@ip-172-31-86-248 whizlabs]# aws s3api upload-part --bucket s3-multipart-final1 --key Gopala.mp4 --part-number 1 --bo
+dy xaa --upload-id y05ZUlfPG92GOiLjCaG6CagzeLNq5164Ibo71iOT9r._zqJKu3Lgc8RncdXctHhAGAdaK51IAx5t1sHxwtRRO2qU9Cr6eAeZnL_X0Bj
+xq1KwJ1.4OKn_6pSy6fSViTA5S.EUvSEyh5J2AvstF.4eCg--
+{
+    "ETag": "\"7e45ac73a0ac6e41c53052120a9d9623\""
+}
+[root@ip-172-31-86-248 whizlabs]# 
+
+--------------------------
+[root@ip-172-31-86-248 whizlabs]# aws s3api upload-part --bucket s3-multipart-final1 --key Gopala.mp4 --part-number 2 --bo
+dy xab --upload-id y05ZUlfPG92GOiLjCaG6CagzeLNq5164Ibo71iOT9r._zqJKu3Lgc8RncdXctHhAGAdaK51IAx5t1sHxwtRRO2qU9Cr6eAeZnL_X0Bj
+xq1KwJ1.4OKn_6pSy6fSViTA5S.EUvSEyh5J2AvstF.4eCg--
+{
+    "ETag": "\"fe5a714cb0ce66a0f7dc02ea01996ac3\""
+}
+-----------------------------------
+
+[root@ip-172-31-86-248 whizlabs]# aws s3api upload-part --bucket s3-multipart-final1 --key Gopala.mp4 --part-number 2 --bo
+dy xab --upload-id y05ZUlfPG92GOiLjCaG6CagzeLNq5164Ibo71iOT9r._zqJKu3Lgc8RncdXctHhAGAdaK51IAx5t1sHxwtRRO2qU9Cr6eAeZnL_X0Bj
+xq1KwJ1.4OKn_6pSy6fSViTA5S.EUvSEyh5J2AvstF.4eCg--
+{
+    "ETag": "\"fe5a714cb0ce66a0f7dc02ea01996ac3\""
+}
+[root@ip-172-31-86-248 whizlabs]# 
+[root@ip-172-31-86-248 whizlabs]# 
+[root@ip-172-31-86-248 whizlabs]# aws s3api upload-part --bucket s3-multipart-final1 --key Gopala.mp4 --part-number 3 --bo
+dy xac --upload-id y05ZUlfPG92GOiLjCaG6CagzeLNq5164Ibo71iOT9r._zqJKu3Lgc8RncdXctHhAGAdaK51IAx5t1sHxwtRRO2qU9Cr6eAeZnL_X0Bj
+xq1KwJ1.4OKn_6pSy6fSViTA5S.EUvSEyh5J2AvstF.4eCg--
+{
+    "ETag": "\"8ae8897b3300a7c9957ed31abfbfcbf8\""
+}
+---------------------------------
+
+[root@ip-172-31-86-248 whizlabs]# aws s3api upload-part --bucket s3-multipart-final1 --key Gopala.mp4 --part-number 4 --bo
+dy xad --upload-id y05ZUlfPG92GOiLjCaG6CagzeLNq5164Ibo71iOT9r._zqJKu3Lgc8RncdXctHhAGAdaK51IAx5t1sHxwtRRO2qU9Cr6eAeZnL_X0Bj
+xq1KwJ1.4OKn_6pSy6fSViTA5S.EUvSEyh5J2AvstF.4eCg--
+{
+    "ETag": "\"45eb1118392dd0712e915fa994060183\""
+}
+-------------------------------------
+[root@ip-172-31-86-248 whizlabs]# aws s3api upload-part --bucket s3-multipart-final1 --key Gopala.mp4 --part-number 5 --bo
+dy xae --upload-id y05ZUlfPG92GOiLjCaG6CagzeLNq5164Ibo71iOT9r._zqJKu3Lgc8RncdXctHhAGAdaK51IAx5t1sHxwtRRO2qU9Cr6eAeZnL_X0Bj
+xq1KwJ1.4OKn_6pSy6fSViTA5S.EUvSEyh5J2AvstF.4eCg--
+{
+    "ETag": "\"7997b9fb4d0234aad271b34aa3880f70\""
+}
+
+-------------------------
+[root@ip-172-31-86-248 whizlabs]# aws s3api upload-part --bucket s3-multipart-final1 --key Gopala.mp4 --part-number 6 --bo
+dy xaf --upload-id y05ZUlfPG92GOiLjCaG6CagzeLNq5164Ibo71iOT9r._zqJKu3Lgc8RncdXctHhAGAdaK51IAx5t1sHxwtRRO2qU9Cr6eAeZnL_X0Bj
+xq1KwJ1.4OKn_6pSy6fSViTA5S.EUvSEyh5J2AvstF.4eCg--
+{
+    "ETag": "\"1ac9da2bf996ff7970f4f16a54d73143\""
+}
+------------------------------
+
+[root@ip-172-31-86-248 whizlabs]# aws s3api upload-part --bucket s3-multipart-final1 --key Gopala.mp4 --part-number 7 --bo
+dy xag --upload-id y05ZUlfPG92GOiLjCaG6CagzeLNq5164Ibo71iOT9r._zqJKu3Lgc8RncdXctHhAGAdaK51IAx5t1sHxwtRRO2qU9Cr6eAeZnL_X0Bj
+xq1KwJ1.4OKn_6pSy6fSViTA5S.EUvSEyh5J2AvstF.4eCg--
+{
+    "ETag": "\"b5342d986f94f9b43c0cfa10d6771095\""
+}
+
+--------------------------------------------------------------------------------
+
+create a bucket
+
+to deny delete object
+to delete object-------------------------------------------------
+
+
+
+
+
+
+
+
+
+Last login: Wed Oct 27 16:07:34 2021 from ec2-18-206-107-25.compute-1.amazonaws.com
+
+       __|  __|_  )
+       _|  (     /   Amazon Linux 2 AMI
+      ___|\___|___|
+
+https://aws.amazon.com/amazon-linux-2/
+[ec2-user@ip-172-31-86-248 ~]$ sudo -s
+[root@ip-172-31-86-248 ec2-user]# cd whizlabs/
+[root@ip-172-31-86-248 whizlabs]# ls 
+Gopala.mp4  list.json  xaa  xab  xac  xad  xae  xaf  xag
+[root@ip-172-31-86-248 whizlabs]# ls -lrt
+total 70484
+-rw-r--r-- 1 root root 36084659 Oct 27 15:12 Gopala.mp4
+-rw-r--r-- 1 root root  5242880 Oct 27 15:41 xaa
+-rw-r--r-- 1 root root  5242880 Oct 27 15:41 xac
+-rw-r--r-- 1 root root  5242880 Oct 27 15:41 xab
+-rw-r--r-- 1 root root  5242880 Oct 27 15:41 xad
+-rw-r--r-- 1 root root  5242880 Oct 27 15:41 xaf
+-rw-r--r-- 1 root root  5242880 Oct 27 15:41 xae
+-rw-r--r-- 1 root root  4627379 Oct 27 15:41 xag
+-rw-r--r-- 1 root root      565 Oct 27 16:16 list.json
+[root@ip-172-31-86-248 whizlabs]# df -kh
+Filesystem      Size  Used Avail Use% Mounted on
+devtmpfs        482M     0  482M   0% /dev
+tmpfs           492M     0  492M   0% /dev/shm
+tmpfs           492M  556K  492M   1% /run
+
+
+[root@ip-172-31-86-248 whizlabs]# cat list.json 
+{ "Parts": [
+    { "PartNumber": 1, "ETag": "\"7e45ac73a0ac6e41c53052120a9d9623\""
+    },
+    { "PartNumber": 2, "ETag": "\"fe5a714cb0ce66a0f7dc02ea01996ac3\""
+    },
+    { "PartNumber": 3, "ETag": "\"fe5a714cb0ce66a0f7dc02ea01996ac3\""
+    },
+    { "PartNumber": 4, "ETag": "\"45eb1118392dd0712e915fa994060183\""
+    },
+    { "PartNumber": 5, "ETag": "\"7997b9fb4d0234aad271b34aa3880f70\""
+    },
+    { "PartNumber": 6, "ETag": "\"1ac9da2bf996ff7970f4f16a54d73143\""
+    },
+    { "PartNumber": 7, "ETag": "\"b5342d986f94f9b43c0cfa10d6771095\""
+    }
+          ]
+}
+
+--------------------------------
+
+20-11-2021
+======
+login as: ec2-user
+Authenticating with public key "imported-openssh-key"
+
+       __|  __|_  )
+       _|  (     /   Amazon Linux 2 AMI
+      ___|\___|___|
+
+https://aws.amazon.com/amazon-linux-2/
+[ec2-user@ip-192-168-0-12 ~]$ sudo su
+[root@ip-192-168-0-12 ec2-user]#
+[root@ip-192-168-0-12 ec2-user]#
+[root@ip-192-168-0-12 ec2-user]# vi Mallika.pem
+[root@ip-192-168-0-12 ec2-user]#
+[root@ip-192-168-0-12 ec2-user]#
+[root@ip-192-168-0-12 ec2-user]# chmod 400 Mallika.pem
+[root@ip-192-168-0-12 ec2-user]#
+[root@ip-192-168-0-12 ec2-user]#
+[root@ip-192-168-0-12 ec2-user]# ssh -i Mallika.pem ec2-user@192.168.0.54
+The authenticity of host '192.168.0.54 (192.168.0.54)' can't be established.
+ECDSA key fingerprint is SHA256:yxuq5hWrSnAqRz3iFIULqzViXfole8FX/fU+6UNiuGM.
+ECDSA key fingerprint is MD5:89:5c:76:c9:db:f9:a9:cb:63:d5:f9:da:99:ad:28:39.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '192.168.0.54' (ECDSA) to the list of known hosts.
+
+       __|  __|_  )
+       _|  (     /   Amazon Linux 2 AMI
+      ___|\___|___|
+
+https://aws.amazon.com/amazon-linux-2/
+[ec2-user@ip-192-168-0-54 ~]$
+[ec2-user@ip-192-168-0-54 ~]$
+
+[ec2-user@ip-192-168-0-54 ~]$
+[ec2-user@ip-192-168-0-54 ~]$ aws s3 ls
+2021-11-20 17:07:31 myaws2502
+[ec2-user@ip-192-168-0-54 ~]$
+[ec2-user@ip-192-168-0-54 ~]$ aws s3 ls
+2021-11-20 17:12:06 mallikabucket1
+2021-11-20 17:07:31 myaws2502
+[ec2-user@ip-192-168-0-54 ~]$ aws s3 ls
+2021-11-20 17:12:06 mallikabucket1
+2021-11-20 17:07:31 myaws2502
+[ec2-user@ip-192-168-0-54 ~]$
+
+===============================================
+
+
+FVPC----10.0.0.0/24
+SVPC---20.0.0.0/24
+
+
+
+
+
+arn:aws:s3:::buckettest2022
+
+
+
+
+
+
+-----------------------------------------
+
+
+Once you are logged into the EC2 instance,
+switch to root user.
+sudo su
+Update :yum update -yStress Tool : Amazon Linux 2 AMI does not have the stress tool installed by default,
+ we will need to install some packagessudo 
+amazon-linux-extras install epel -yyum install stress -y
+
+amazon-linux-extras install epel -yyum install stress -y
+
+---
+
+sudo amazon-linux-extras install epel -y
+yum install stress -y
+
+
+sudo stress --cpu 10 -v --timeout 400s
+From mithra manikandan to Everyone:  09:46 PM
+
+
+sudo stress --cpu 10 -v --timeout 400s
+
+
+
+-------------------------
+ Once you are logged into the EC2 instance, 
+switch to root user.
+
+
+sudo su
+
+
+Update :
+
+yum update -y
+
+
+Stress Tool : Amazon Linux 2 AMI does not have the stress tool installed by default, we will need to install some packages
+
+
+sudo amazon-linux-extras install epel -y
+
+
+yum install stress -y
+
+
+•	Having experience on Docker, Creating containers by using Docker images
+
+
+
+Configured EC2 instances, Load balancer, Auto Scaling/Shrining, Security Groups, IAAM for authentication
+
+Knowledge on Amazon Web Services environment  Elastic Compute Cloud (EC2), Virtual Private Cloud(VPC), IAM, and Simple Storage Service (S3), SNS
+
+AWS (VPC, EC2, S3, Iam, Auto scalling, SNS)
+
+
+
+
+
+BT is the largest provider of consumer fixed-line voice and broadband services in the UK. BT
+Retail & Consumer is the main division of BT Group. A support project which has one major
+LoB of collaboration platform of BT – BTRetail where development, testing, deployments and
+release management of the website are managed by BT-COM DevOPS which is a team carried
+out configurations, management and build, deployments for the release.
+
+
+Ecommerce is platform where the BT customers can place different requests for telecom
+services (PSTN and broadband). It acts as a frontend to bt.com and host of other back end
+applications used for placing orders pertaining to BT Retail customers.
+
+
+
+
+Endpoint
+database-1.chabi7ttemrf.us-east-1.rds.amazonaws.com
+Port
+3306
+
+
+
+mysql -h database-1.chabi7ttemrf.us-east-1.rds.amazonaws.com -P 3306 -u admin -p
+
+
+
+
+
+UserName : Enter HarryPotterOrderID : Enter 20160630-12928ReturnDate : Enter 20190705UserAmount : Enter 142.23
+
+
+Enter UserName : Enter HarryPotter
+Enter OrderID : Enter 20160630-28176Enter ReturnDate : Enter 20190513Enter UserAmount : Enter 88.30Attribute name - Attribue ValueEnter 
+
+UserName : Enter RonEnter 
+OrderID : Enter 20170609-25875Enter ReturnDate : Enter 20190628Enter UserAmount : Enter 116.86
+Attribute name - Attribue ValueEnter UserName : Enter RonEnter OrderID : Enter 20170609-4177Enter ReturnDate : Enter 20190731Enter UserAmount : Enter 27.89
+Attribute name - Attribue ValueEnter UserName : Enter Voldemort Enter OrderID : Enter 20170609-17146Enter ReturnDate : Enter 20190511Enter UserAmount : Enter 114.00Attribute name - Attribue ValueEnter UserName : Enter Voldemort Enter OrderID : Enter 20170609-18618Enter ReturnDate : Enter 20190615Enter UserAmount : Enter 122.45
+
